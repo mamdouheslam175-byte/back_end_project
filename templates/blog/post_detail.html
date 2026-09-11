@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<article class="article-container" id="post-detail-{{ post.slug }}">
+
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+        <ol class="breadcrumb-list">
+            <li><a href="{% url 'blog:post_list' %}">Home</a></li>
+            <li><span class="separator">&rsaquo;</span></li>
+            <li><a href="{% url 'blog:category_posts' post.category.slug %}">{{ post.category.name }}</a></li>
+            <li><span class="separator">&rsaquo;</span></li>
+            <li class="current" aria-current="page">{{ post.title|truncatechars:40 }}</li>
+        </ol>
+    </nav>
+
+    <!-- Article Header -->
+    <header class="article-header">
+        <div class="article-tags">
+            <a href="{% url 'blog:category_posts' post.category.slug %}" class="card-category-badge">
+                {{ post.category.name }}
+            </a>
+            <span class="reading-time-pill">
+                ⏱️ {{ post.reading_time }} min read
+            </span>
+        </div>
+
+        <h1 class="article-title">{{ post.title }}</h1>
+
+        <div class="article-meta-bar">
+            <div class="author-meta-block">
+                <div class="author-avatar large">
+                    {{ post.author.username|first|upper }}
+                </div>
+                <div class="meta-details">
+                    <span class="author-name-bold">
+                        {{ post.author.get_full_name|default:post.author.username }}
+                    </span>
+                    <div class="meta-dates">
+                        <time datetime="{{ post.created_at|date:'c' }}">
+                            Published {{ post.created_at|date:"F j, Y" }}
+                        </time>
+                        {% if post.updated_at|date:"YmdHi" != post.created_at|date:"YmdHi" %}
+                            <span class="date-sep">•</span>
+                            <span class="updated-time">Updated {{ post.updated_at|date:"M d, Y" }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="article-actions">
+                <button type="button" class="btn btn-outline" id="copy-link-btn" title="Copy article link to clipboard">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    <span id="copy-btn-text">Share Link</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Article Content Body -->
+    <section class="article-content" id="article-body">
+        {{ post.content|linebreaks }}
+    </section>
+
+    <!-- Article Footer & Author Box -->
+    <footer class="article-footer-card">
+        <div class="author-bio-section">
+            <div class="author-avatar large">
+                {{ post.author.username|first|upper }}
+            </div>
+            <div class="bio-text">
+                <h3>Written by {{ post.author.get_full_name|default:post.author.username }}</h3>
+                <p>
+                    Software engineer and contributor to the DevPulse publication. 
+                    Specializing in Python, backend systems, and clean application architecture.
+                </p>
+            </div>
+        </div>
+
+        <div class="article-nav-buttons">
+            <a href="{% url 'blog:post_list' %}" class="btn btn-secondary">
+                &larr; Back to All Stories
+            </a>
+            <a href="{% url 'blog:category_posts' post.category.slug %}" class="btn btn-primary">
+                More in {{ post.category.name }} &rarr;
+            </a>
+        </div>
+    </footer>
+
+    <!-- Related Posts Section (Bonus UX) -->
+    {% if related_posts %}
+        <section class="related-posts-section">
+            <h2 class="section-title">Related Stories in {{ post.category.name }}</h2>
+            <div class="related-grid">
+                {% for rpost in related_posts %}
+                    <a href="{% url 'blog:post_detail' rpost.slug %}" class="related-card">
+                        <span class="related-read-time">⏱️ {{ rpost.reading_time }} min read</span>
+                        <h3 class="related-title">{{ rpost.title }}</h3>
+                        <time class="related-date">{{ rpost.created_at|date:"M d, Y" }}</time>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+</article>
+{% endblock %}

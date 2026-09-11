@@ -1,0 +1,3 @@
+"""
+blog migrations package.
+"""

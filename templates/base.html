@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Django Blog{% endblock %} | DevPulse</title>
+    <meta name="description" content="A modern, high-performance blog platform built with Django.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="site-header" id="site-header">
+        <div class="header-container">
+            <a href="{% url 'blog:post_list' %}" class="brand-logo" id="brand-logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">Dev<strong>Pulse</strong></span>
+            </a>
+
+            <!-- Search Form -->
+            <form action="{% url 'blog:post_list' %}" method="get" class="search-form" id="global-search-form">
+                <div class="search-input-wrapper">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input 
+                        type="text" 
+                        name="q" 
+                        id="search-input" 
+                        placeholder="Search posts or keywords..." 
+                        value="{{ query|default:'' }}"
+                        autocomplete="off"
+                    >
+                    {% if query %}
+                    <a href="{% url 'blog:post_list' %}" class="clear-search-btn" title="Clear search">&times;</a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <nav class="nav-menu" id="nav-menu">
+                <a href="{% url 'blog:post_list' %}" class="nav-link {% if not is_category_view and not query %}active{% endif %}">Home</a>
+                <div class="dropdown">
+                    <button class="dropdown-trigger" id="categories-dropdown-btn">
+                        Categories
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div class="dropdown-content">
+                        {% for cat in all_categories %}
+                        <a href="{% url 'blog:category_posts' cat.slug %}" class="dropdown-item">
+                            <span>{{ cat.name }}</span>
+                            <span class="badge">{{ cat.published_post_count }}</span>
+                        </a>
+                        {% empty %}
+                        <span class="dropdown-empty">No categories yet</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <a href="/admin/" class="nav-link admin-pill" target="_blank" rel="noopener">Admin Portal</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Wrapper -->
+    <main class="main-wrapper" id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" id="site-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="brand-logo">
+                    <span class="logo-icon">⚡</span>
+                    <span class="logo-text">Dev<strong>Pulse</strong></span>
+                </div>
+                <p class="footer-desc">
+                    A clean-architecture Django blog built for the course assignment. 
+                    Demonstrating Function-Based Views, Django ORM, and modern UX design.
+                </p>
+            </div>
+            
+            <div class="footer-meta">
+                <div class="footer-tag">Django 5.x • Python 3 • Clean Code</div>
+                <p class="copyright">&copy; 2026 DevPulse Blog. Created for Django Course Assignment.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

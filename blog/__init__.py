@@ -1,0 +1,3 @@
+"""
+blog app initialization.
+"""

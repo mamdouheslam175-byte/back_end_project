@@ -1,0 +1,3 @@
+"""
+myblog package initialization.
+"""

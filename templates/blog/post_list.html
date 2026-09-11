@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if is_category_view %}
+        Category: {{ category.name }}
+    {% elif query %}
+        Search: {{ query }}
+    {% else %}
+        Home - Latest Stories
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Hero Header -->
+    <section class="page-hero">
+        <div class="hero-content">
+            {% if is_category_view %}
+                <div class="hero-breadcrumb">
+                    <a href="{% url 'blog:post_list' %}">Home</a> &rsaquo; <span>Category</span>
+                </div>
+                <h1 class="hero-title">
+                    <span class="category-icon">📂</span> {{ category.name }}
+                </h1>
+                <p class="hero-subtitle">
+                    Showing all published articles curated under the <strong>{{ category.name }}</strong> category.
+                </p>
+            {% elif query %}
+                <div class="hero-breadcrumb">
+                    <a href="{% url 'blog:post_list' %}">Home</a> &rsaquo; <span>Search</span>
+                </div>
+                <h1 class="hero-title">
+                    Search Results for <span class="highlight-query">"{{ query }}"</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Found {{ paginator.count }} matching article{{ paginator.count|pluralize }}.
+                </p>
+            {% else %}
+                <div class="hero-badge">Curated Engineering & Tech Blog</div>
+                <h1 class="hero-title">
+                    Insights, Tutorials &amp; Engineering Perspectives
+                </h1>
+                <p class="hero-subtitle">
+                    Explore high-quality articles on Python, Django, modern web architecture, and developer workflows.
+                </p>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Categories Navigation Pills -->
+    <div class="category-pills-bar">
+        <span class="pills-label">Explore:</span>
+        <a href="{% url 'blog:post_list' %}" class="category-pill {% if not is_category_view and not query %}active{% endif %}">
+            All Articles ({{ paginator.count }})
+        </a>
+        {% for cat in all_categories %}
+            <a href="{% url 'blog:category_posts' cat.slug %}" 
+               class="category-pill {% if is_category_view and category.slug == cat.slug %}active{% endif %}">
+                {{ cat.name }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <!-- Posts Grid Section -->
+    <section class="posts-section">
+        {% if posts %}
+            <div class="posts-grid">
+                {% for post in posts %}
+                    <article class="post-card" id="post-{{ post.slug }}">
+                        <div class="card-header">
+                            <a href="{% url 'blog:category_posts' post.category.slug %}" class="card-category-badge">
+                                {{ post.category.name }}
+                            </a>
+                            <span class="reading-time-pill" title="Estimated reading time">
+                                ⏱️ {{ post.reading_time }} min read
+                            </span>
+                        </div>
+
+                        <div class="card-body">
+                            <h2 class="card-title">
+                                <a href="{% url 'blog:post_detail' post.slug %}">
+                                    {{ post.title }}
+                                </a>
+                            </h2>
+                            <p class="card-excerpt">
+                                {{ post.content|truncatewords:32 }}
+                            </p>
+                        </div>
+
+                        <div class="card-footer">
+                            <div class="author-info">
+                                <div class="author-avatar">
+                                    {{ post.author.username|first|upper }}
+                                </div>
+                                <div class="author-meta">
+                                    <span class="author-name">{{ post.author.get_full_name|default:post.author.username }}</span>
+                                    <time class="post-date" datetime="{{ post.created_at|date:'c' }}">
+                                        {{ post.created_at|date:"M d, Y" }}
+                                    </time>
+                                </div>
+                            </div>
+                            <a href="{% url 'blog:post_detail' post.slug %}" class="read-more-link" aria-label="Read full post: {{ post.title }}">
+                                Read Article &rarr;
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <!-- Story 8: Pagination Controls -->
+            {% if paginator.num_pages > 1 %}
+                <nav class="pagination-nav" aria-label="Blog posts pagination" id="pagination-nav">
+                    <ul class="pagination-list">
+                        <!-- First & Previous -->
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a href="?{% if query %}q={{ query }}&{% endif %}page=1" class="page-link" aria-label="First page">&laquo; First</a>
+                            </li>
+                            <li class="page-item">
+                                <a href="?{% if query %}q={{ query }}&{% endif %}page={{ page_obj.previous_page_number }}" class="page-link" aria-label="Previous page">&lsaquo; Prev</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">&laquo; First</span></li>
+                            <li class="page-item disabled"><span class="page-link">&lsaquo; Prev</span></li>
+                        {% endif %}
+
+                        <!-- Page number badges -->
+                        {% for num in paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a href="?{% if query %}q={{ query }}&{% endif %}page={{ num }}" class="page-link">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Next & Last -->
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a href="?{% if query %}q={{ query }}&{% endif %}page={{ page_obj.next_page_number }}" class="page-link" aria-label="Next page">Next &rsaquo;</a>
+                            </li>
+                            <li class="page-item">
+                                <a href="?{% if query %}q={{ query }}&{% endif %}page={{ paginator.num_pages }}" class="page-link" aria-label="Last page">Last &raquo;</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Next &rsaquo;</span></li>
+                            <li class="page-item disabled"><span class="page-link">Last &raquo;</span></li>
+                        {% endif %}
+                    </ul>
+                    <div class="pagination-info">
+                        Page {{ page_obj.number }} of {{ paginator.num_pages }} ({{ paginator.count }} total posts)
+                    </div>
+                </nav>
+            {% endif %}
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state-card" id="empty-state">
+                <div class="empty-icon">🔍</div>
+                <h3>No articles found</h3>
+                <p>
+                    {% if query %}
+                        No published articles match the search query "<strong>{{ query }}</strong>".
+                    {% elif is_category_view %}
+                        There are currently no published articles in <strong>{{ category.name }}</strong>.
+                    {% else %}
+                        No published posts available yet. Run the seed command or publish posts via Admin!
+                    {% endif %}
+                </p>
+                <div class="empty-actions">
+                    <a href="{% url 'blog:post_list' %}" class="btn btn-primary">
+                        Return to All Stories
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}
